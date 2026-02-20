@@ -85,11 +85,21 @@ package body Renderer is
 
       Erase (Win);
       
+      -- Reset attributes so stats don't blink if the last frame had a blinking character
+      Set_Character_Attributes (Win, Attr => (others => False), Color => Color_Pair (1));
+
       -- Stats (Line 0 relative to offset)
       Move_Cursor (Win, L_Off, C_Off);
-      Add (Win, "Score: " & Pad (State.Score, 4) & "  Diamonds: " & 
-           Pad (State.Diamonds_Held) & "/" & Pad (State.Diamonds_Needed) &
-           "  Lives: " & Pad (State.Lives));
+      
+      declare
+         Stats_Str : constant String := "Score: " & Pad (State.Score, 4) & "  Diamonds: " & 
+                                        Pad (State.Diamonds_Held) & "/" & Pad (State.Diamonds_Needed) &
+                                        "  Lives: " & Pad (State.Lives);
+         Padding   : constant Integer := (80 - Stats_Str'Length) / 2;
+         Pad_Str   : constant String (1 .. Padding) := [others => ' '];
+      begin
+         Add (Win, Pad_Str & Stats_Str);
+      end;
       
       -- Map (Line 2-23 relative to offset)
       for R in 1 .. Max_Rows loop
@@ -120,6 +130,13 @@ package body Renderer is
             Set_Character_Attributes (Win, Color => Color_Pair (1));
          end loop;
       end loop;
+      
+      -- Draw death animation over whatever is currently at player position
+      if State.Death_Timer > 0 then
+         Move_Cursor (Win, L_Off + Line_Position (State.Player_Row + 1), C_Off + Column_Position (State.Player_Col - 1));
+         Set_Character_Attributes (Win, Attr => (Blink => True, others => False), Color => Color_Pair (2));
+         Add (Win, "X");
+      end if;
       
       Refresh (Win);
    end Draw_Game;

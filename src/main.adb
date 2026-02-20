@@ -1,6 +1,7 @@
 with Engine; use Engine;
 with Renderer; use Renderer;
 with Levels; use Levels;
+with Settings;
 with Terminal_Interface.Curses; use Terminal_Interface.Curses;
 
 procedure Main is
@@ -28,7 +29,7 @@ begin
       -- Start a new game / level
       Restart_Requested := False;
       Levels.Setup_Level (State, 1);
-      Set_Timeout_Mode (Win, Non_Blocking, 100); -- 100ms delay for loop
+      Set_Timeout_Mode (Win, Delayed, Settings.Game_Tick_Ms);
 
       Play_Session:
       loop

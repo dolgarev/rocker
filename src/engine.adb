@@ -1,3 +1,5 @@
+with Settings; use Settings;
+
 package body Engine is
 
    procedure Check_Exit_Reveal (State : in out Game_State) is
@@ -23,6 +25,7 @@ package body Engine is
       State.Score := 0;
       State.Lives := 3;
       State.Tick_Count := 0;
+      State.Death_Timer := 0;
       State.Game_Over := False;
       State.Level_Complete := False;
    end Initialize;
@@ -31,6 +34,10 @@ package body Engine is
       New_R : constant Integer := State.Player_Row + DR;
       New_C : constant Integer := State.Player_Col + DC;
    begin
+      if State.Death_Timer > 0 then
+         return;
+      end if;
+
       if New_R not in 1 .. Max_Rows or New_C not in 1 .. Max_Cols then
          return;
       end if;
@@ -95,10 +102,34 @@ package body Engine is
 
    begin
       State.Tick_Count := State.Tick_Count + 1;
-      -- SLOW DOWN: Only run physics every X ticks. 
-      -- Loop is 100ms, mod 688 = physics every 68.8s.
-      -- Delay before move = Activation (68.8s) + Movement (68.8s) = 137.6s total.
-      if State.Tick_Count mod 688 /= 0 then
+      
+      -- Handle death animation independently of physics framerate
+      if State.Death_Timer > 0 then
+         State.Death_Timer := State.Death_Timer - 1;
+         if State.Death_Timer = 0 then
+            State.Lives := State.Lives - 1;
+            
+            -- Remove old player pos (if not already overwritten by a boulder)
+            if State.Map (State.Player_Row, State.Player_Col) = Player then
+               State.Map (State.Player_Row, State.Player_Col) := Space;
+            end if;
+            
+            -- Reset player pos
+            State.Player_Row := 2;
+            State.Player_Col := 2;
+            State.Map (2, 2) := Player;
+            
+            if State.Lives <= 0 then
+               State.Game_Over := True;
+            end if;
+         end if;
+         return; -- Freeze game mechanics while dying
+      end if;
+
+      -- SLOW DOWN: Only run physics every Settings.Physics_Ticks_Delay ticks. 
+      -- Loop is Game_Tick_Ms, mod Physics_Ticks_Delay = physics every (Game_Tick_Ms * Physics_Ticks_Delay).
+      -- Delay before move = Activation + Movement.
+      if State.Tick_Count mod Physics_Ticks_Delay /= 0 then
          return;
       end if;
 
@@ -126,29 +157,12 @@ package body Engine is
                -- 2. Crush logic (only if ALREADY falling)
                elsif Next = Player then
                   if Current = Falling_Boulder or Current = Falling_Diamond then
-                     State.Lives := State.Lives - 1;
+                     -- Place the object (Boulder or Diamond) where the player was
+                     State.Map (R + 1, C) := To_Stationary (Current);
                      
-                     -- Remove player from map before placing stationary object
-                     State.Map (State.Player_Row, State.Player_Col) := Space;
-                     
-                     if Current = Falling_Diamond then
-                        State.Diamonds_Held := State.Diamonds_Held + 1;
-                        State.Score := State.Score + 10;
-                        Check_Exit_Reveal (State);
-                     else
-                        State.Map (R + 1, C) := Boulder;
-                     end if;
-                     
+                     -- Start death sequence
                      State.Map (R, C) := Space;
-                     
-                     -- Reset player pos
-                     State.Player_Row := 2;
-                     State.Player_Col := 2;
-                     State.Map (2, 2) := Player;
-                     
-                     if State.Lives <= 0 then
-                        State.Game_Over := True;
-                     end if;
+                     State.Death_Timer := Death_Duration_Ticks;
                   end if;
                
                -- 3. Slide logic (Rounded surfaces)

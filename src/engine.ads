@@ -16,6 +16,7 @@ package Engine is
       Score           : Integer;
       Lives           : Integer;
       Tick_Count      : Integer;
+      Death_Timer     : Integer;
       Game_Over       : Boolean;
       Level_Complete  : Boolean;
    end record;
