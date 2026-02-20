@@ -1,5 +1,18 @@
 package body Engine is
 
+   procedure Check_Exit_Reveal (State : in out Game_State) is
+   begin
+      if State.Diamonds_Held >= State.Diamonds_Needed then
+         for R in 1 .. Max_Rows loop
+            for C in 1 .. Max_Cols loop
+               if State.Map (R, C) = Exit_Closed then
+                  State.Map (R, C) := Exit_Open;
+               end if;
+            end loop;
+         end loop;
+      end if;
+   end Check_Exit_Reveal;
+
    procedure Initialize (State : out Game_State) is
    begin
       State.Map := [others => [others => Space]];
@@ -37,15 +50,7 @@ package body Engine is
             State.Diamonds_Held := State.Diamonds_Held + 1;
             State.Score := State.Score + 10;
             
-            if State.Diamonds_Held >= State.Diamonds_Needed then
-               for R in 1 .. Max_Rows loop
-                  for C in 1 .. Max_Cols loop
-                     if State.Map (R, C) = Exit_Closed then
-                        State.Map (R, C) := Exit_Open;
-                     end if;
-                  end loop;
-               end loop;
-            end if;
+            Check_Exit_Reveal (State);
             
          when Boulder =>
             -- Push boulder mechanic (only horizontal)
@@ -122,11 +127,21 @@ package body Engine is
                elsif Next = Player then
                   if Current = Falling_Boulder or Current = Falling_Diamond then
                      State.Lives := State.Lives - 1;
-                     State.Map (R + 1, C) := To_Stationary (Current);
+                     
+                     -- Remove player from map before placing stationary object
+                     State.Map (State.Player_Row, State.Player_Col) := Space;
+                     
+                     if Current = Falling_Diamond then
+                        State.Diamonds_Held := State.Diamonds_Held + 1;
+                        State.Score := State.Score + 10;
+                        Check_Exit_Reveal (State);
+                     else
+                        State.Map (R + 1, C) := Boulder;
+                     end if;
+                     
                      State.Map (R, C) := Space;
                      
-                     -- Reset player pos (clear old)
-                     State.Map (State.Player_Row, State.Player_Col) := Space;
+                     -- Reset player pos
                      State.Player_Row := 2;
                      State.Player_Col := 2;
                      State.Map (2, 2) := Player;

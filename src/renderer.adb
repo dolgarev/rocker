@@ -112,7 +112,7 @@ package body Renderer is
                   Set_Character_Attributes (Win, Color => Color_Pair (8));
                   Add (Win, "+");
                when Exit_Open =>
-                  Set_Character_Attributes (Win, Color => Color_Pair (5));
+                  Set_Character_Attributes (Win, Attr => (Blink => True, others => False), Color => Color_Pair (5));
                   Add (Win, "E");
                when Space | Exit_Closed =>
                   Add (Win, " ");
