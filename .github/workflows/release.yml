@@ -1,0 +1,35 @@
+name: Build and Release Rocker
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger only when a version tag is created, e.g., v1.0.0
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Ada and Ncurses Dependencies
+        run: |
+          sudo apt-get update
+          # Install GNAT, GPRBuild and the ncursesada library
+          sudo apt-get install -y gnat gprbuild libncursesada-dev
+
+      - name: Build Rocker
+        run: |
+          # Create the destination directory if it doesn't exist
+          mkdir -p dest
+          # Build the project
+          gprbuild -P rocker.gpr
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dest/rocker
+          body: "Automated Rocker release for Linux (x86_64)."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
