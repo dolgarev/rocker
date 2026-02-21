@@ -32,7 +32,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: dest/rocker
+          files: dest/rocker-linux-amd64
           body: "Automated Rocker release for Linux (x86_64)."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
