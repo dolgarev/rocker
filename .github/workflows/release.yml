@@ -27,6 +27,7 @@ jobs:
           mkdir -p dest
           # Build the project
           gprbuild -P rocker.gpr
+          mv dest/rocker dest/rocker-linux-amd64
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
