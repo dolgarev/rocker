@@ -24,15 +24,15 @@ jobs:
       - name: Build Rocker
         run: |
           # Create the destination directory if it doesn't exist
-          mkdir -p dest
+          mkdir -p dist
           # Build the project
           gprbuild -P rocker.gpr
-          mv dest/rocker dest/rocker-linux-amd64
+          mv dist/rocker dist/rocker-linux-amd64
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: dest/rocker-linux-amd64
+          files: dist/rocker-linux-amd64
           fail_on_unmatched_files: true
           generate_release_notes: true
           body: "Automated Rocker release for Linux (x86_64)."

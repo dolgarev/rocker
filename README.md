@@ -30,9 +30,9 @@ To build the project:
 ```bash
 gprbuild -P rocker.gpr
 ```
-The executable will be placed in the `dest` directory. Run it:
+The executable will be placed in the `dist` directory. Run it:
 ```bash
-./dest/main
+./dist/main
 ```
 
 ## Project Structure
