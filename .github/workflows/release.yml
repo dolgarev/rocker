@@ -28,11 +28,14 @@ jobs:
           # Build the project
           gprbuild -P rocker.gpr
           mv bin/rocker bin/rocker-linux-amd64
+          sha256sum bin/rocker-linux-amd64 > bin/rocker-linux-amd64.sha256
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: bin/rocker-linux-amd64
+          files: |
+            bin/rocker-linux-amd64
+            bin/rocker-linux-amd64.sha256
           fail_on_unmatched_files: true
           generate_release_notes: true
           body: "Automated Rocker release for Linux (x86_64)."
