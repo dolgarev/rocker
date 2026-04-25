@@ -2,6 +2,8 @@
 
 **Rocker** is a free implementation of the game for the **Agat-7** computer, following the style of the classic **Boulder Dash**. This project is written in **Ada 2022** using the **ncurses** library.
 
+<img width="1032" height="800" alt="ksnip_20260425-211021" src="https://github.com/user-attachments/assets/ab37ca52-7a09-4838-8ab1-bc5e166ff129" />
+
 ## Features
 
 - **Classic Mechanics**: Collect diamonds, dig through dirt, and avoid falling boulders.
